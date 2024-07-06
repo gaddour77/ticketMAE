@@ -14,6 +14,7 @@ import tn.esprit.ticketmaeassurrance.services.AuthentificationService;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/auth")
 @Slf4j
+@CrossOrigin(origins = "http://localhost:4200")
 public class AuthentificationController {
     private final AuthentificationService authentificationService;
     @PostMapping("/register")

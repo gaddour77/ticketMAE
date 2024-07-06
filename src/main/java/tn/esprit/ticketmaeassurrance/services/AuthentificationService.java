@@ -18,6 +18,7 @@ import tn.esprit.ticketmaeassurrance.entities.User;
 import tn.esprit.ticketmaeassurrance.repositories.TokenRepository;
 import tn.esprit.ticketmaeassurrance.repositories.UserRepository;
 import tn.esprit.ticketmaeassurrance.security.JwtService;
+import tn.esprit.ticketmaeassurrance.security.PasswordGenerator;
 
 @Service
 @AllArgsConstructor
@@ -29,32 +30,19 @@ public class AuthentificationService {
     private final AuthenticationManager authenticationManager;
     private final EMailSender mailSender;
     public AuthenticationResponse register(RegistrationRequest request) {
-        // Prepend "+216" to the phone number if it doesn't already start with it
-      /*  String phoneNumber = request.getPhoneNumber();
-        if (phoneNumber != null && !phoneNumber.startsWith("+216")) {
-            phoneNumber = "+216" + phoneNumber;
-        }*/
+        //password generé automatique pour l'envoi
+       // String generatedPassword = PasswordGenerator.generatePassword();
 
-         /* var user = User.builder()
-                .firstName(request.getFirstname())
-                .lastName(request.getLastname())
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role(request.getRole())
-                // Use the modified phone number
-                .build();
-
-        */
-var user = User.builder()
+        var user = User.builder()
         .firstName(request.getFirstname())
         .lastName(request.getLastname())
-        .email(request.getEmail())
+        .email(request.getEmail()).role(request.getRole())
         .password(passwordEncoder.encode(request.getPassword()))
-        // Use the modified phone number
         .build();
 
         var savedUser = userRepository.save(user);
-       // mailSender.sendMail(user.getEmail(),"your account of mae assurance ","hello");
+        //a configurer ki iji si moez
+        //mailSender.sendMail(user.getEmail(),"votre compte a été crée  ","votre mot de passe actuelle est "+generatedPassword+"s'il vous plait changer votre mot de passe ");
         var jwtToken = jwtService.generateToken((UserDetails) user);
         var refreshToken = jwtService.generateRefreshToken((UserDetails) user);
        // profileServices.createProfileForUser(savedUser);
@@ -83,6 +71,7 @@ var user = User.builder()
                         .errorMessage("You are banned. Please contact support for assistance.")
                         .build();
             }*/
+            System.out.println(user.getEmail());
 
             var jwtToken = jwtService.generateToken((UserDetails) user);
             var refreshToken = jwtService.generateRefreshToken((UserDetails) user);

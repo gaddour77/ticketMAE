@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.security.Principal;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static jakarta.persistence.FetchType.EAGER;
@@ -32,6 +33,10 @@ public class User implements UserDetails , Principal{
     private String password;
    @Enumerated(EnumType.STRING)
    private Role role;
+   @OneToMany(mappedBy = "employe",cascade = CascadeType.ALL)
+   private Set<Ticket> ticketDeclare ;
+    @OneToMany(mappedBy = "itEmploye",cascade = CascadeType.ALL)
+    private Set<Ticket> ticketReserve;
 
 
     @Override
