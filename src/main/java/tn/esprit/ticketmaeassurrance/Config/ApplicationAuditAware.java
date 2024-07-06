@@ -1,5 +1,6 @@
 package tn.esprit.ticketmaeassurrance.Config;
 
+import lombok.AllArgsConstructor;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -8,6 +9,7 @@ import tn.esprit.ticketmaeassurrance.entities.User;
 
 import java.util.Optional;
 
+@AllArgsConstructor
 public class ApplicationAuditAware implements AuditorAware<Integer> {
     @Override
     public Optional<Integer> getCurrentAuditor() {

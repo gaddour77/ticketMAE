@@ -3,12 +3,17 @@ package tn.esprit.ticketmaeassurrance.services;
 
 import lombok.AllArgsConstructor;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import tn.esprit.ticketmaeassurrance.Config.ApplicationAuditAware;
 import tn.esprit.ticketmaeassurrance.auth.AuthenticationRequest;
 import tn.esprit.ticketmaeassurrance.auth.AuthenticationResponse;
 import tn.esprit.ticketmaeassurrance.auth.RegistrationRequest;
@@ -20,6 +25,8 @@ import tn.esprit.ticketmaeassurrance.repositories.UserRepository;
 import tn.esprit.ticketmaeassurrance.security.JwtService;
 import tn.esprit.ticketmaeassurrance.security.PasswordGenerator;
 
+import java.util.Optional;
+
 @Service
 @AllArgsConstructor
 public class AuthentificationService {
@@ -29,6 +36,7 @@ public class AuthentificationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final EMailSender mailSender;
+
     public AuthenticationResponse register(RegistrationRequest request) {
         //password generé automatique pour l'envoi
        // String generatedPassword = PasswordGenerator.generatePassword();
@@ -112,5 +120,24 @@ public class AuthentificationService {
             token.setRevoked(true);
         });
         tokenRepository.saveAll(validUserTokens);
+    }
+    public User connected(){
+
+        Authentication loggedInUser = SecurityContextHolder.getContext().getAuthentication();
+
+        String mail = loggedInUser.getName().toString();
+        System.out.println("connected user : "+mail);
+        User user = userRepository.findByEmail(mail)
+                .orElseThrow(() -> new RuntimeException("Authenticated user not found"));
+        return user;
+    }
+    public String getCurrentUsername() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String currentUserName = authentication.getName();
+            return currentUserName;
+        } else {
+            return "AnonymousUser"; // or handle as per your application logic
+        }
     }
 }
