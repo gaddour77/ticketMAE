@@ -15,6 +15,7 @@ import org.springframework.security.web.authentication.logout.LogoutHandler;
 import tn.esprit.ticketmaeassurrance.security.JwtFilter;
 
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
+import static tn.esprit.ticketmaeassurrance.entities.Role.IT;
 import static tn.esprit.ticketmaeassurrance.entities.Role.ADMIN;
 
 @Configuration
@@ -55,6 +56,8 @@ public class SecurityConfiguration {
                                 .requestMatchers("/panne/**").permitAll()
                                 .requestMatchers("/panne/getbytype").permitAll()
                                 .requestMatchers("/Ticket/**").permitAll()
+                                .requestMatchers("/Ticket/bytype").permitAll()
+                                .requestMatchers("/Ticket/byetat").permitAll()
                                 .requestMatchers("/api/v1/management/**").hasAnyRole(ADMIN.name())
                                 .requestMatchers("/api/v1/management/**").hasAnyRole(ADMIN.name())
                                 .requestMatchers("/api/v1/management/**").hasAnyRole(ADMIN.name())

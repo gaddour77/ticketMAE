@@ -1,9 +1,13 @@
 package tn.esprit.ticketmaeassurrance.services;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.DisabledException;
@@ -25,6 +29,7 @@ import tn.esprit.ticketmaeassurrance.repositories.UserRepository;
 import tn.esprit.ticketmaeassurrance.security.JwtService;
 import tn.esprit.ticketmaeassurrance.security.PasswordGenerator;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @Service
@@ -79,7 +84,7 @@ public class AuthentificationService {
                         .errorMessage("You are banned. Please contact support for assistance.")
                         .build();
             }*/
-            System.out.println(user.getEmail());
+            //System.out.println(user.getEmail());
 
             var jwtToken = jwtService.generateToken((UserDetails) user);
             var refreshToken = jwtService.generateRefreshToken((UserDetails) user);
@@ -121,6 +126,34 @@ public class AuthentificationService {
         });
         tokenRepository.saveAll(validUserTokens);
     }
+    public void refreshToken(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) throws IOException {
+        final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        final String refreshToken;
+        final String userEmail;
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return;
+        }
+        refreshToken = authHeader.substring(7);
+        userEmail = jwtService.extractUsername(refreshToken);
+        if (userEmail != null) {
+            var user = this.userRepository.findByEmail(userEmail)
+                    .orElseThrow();
+            if (jwtService.isTokenValid(refreshToken, (UserDetails) user)) {
+                var accessToken = jwtService.generateToken((UserDetails) user);
+                revokeAllUserTokens(user);
+                saveUserToken(user, accessToken);
+                var authResponse = AuthenticationResponse.builder()
+                        .token(accessToken)
+                        .refreshToken(refreshToken)
+                        .build();
+                new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
+            }
+        }
+    }
+
     public User connected(){
 
         Authentication loggedInUser = SecurityContextHolder.getContext().getAuthentication();
