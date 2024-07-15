@@ -11,7 +11,8 @@ import java.util.List;
 
 public interface TicketRepository extends JpaRepository<Ticket,Long> {
     List<Ticket> findByEmploye_Email(String email);
-    List<Ticket> findByEtatAndEmploye(EtatTicket etatTicket, User user);
+    List<Ticket> findByEtatAndItEmploye(EtatTicket etatTicket, User user);
     List<Ticket> findByEtat(EtatTicket etatTicket);
-    List<Ticket>  findByEtatAndEmployeAndDateFermetureAfter(EtatTicket etat,User user, Date dateFermeture);
+    List<Ticket>  findByEtatAndItEmployeAndDateFermetureAfter(EtatTicket etat,User user, Date dateFermeture);
+    List<Ticket> findByEtatAndEmploye(EtatTicket etatTicket, User user);
 }

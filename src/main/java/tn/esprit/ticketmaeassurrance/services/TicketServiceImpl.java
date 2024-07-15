@@ -9,6 +9,7 @@ import tn.esprit.ticketmaeassurrance.repositories.TicketRepository;
 import tn.esprit.ticketmaeassurrance.repositories.UserRepository;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -48,8 +49,16 @@ public class TicketServiceImpl implements ITicketService{
         String mail = authentificationService.getCurrentUsername();
 
         User user = userRepository.findByEmail(mail).orElse(null);
+        List<Ticket> tickets = new ArrayList<Ticket>();
+        if(user.getRole().equals("IT")){
+            tickets = ticketRepository.findByEtatAndItEmploye(EtatTicket.valueOf(etat.toUpperCase()),user);
+        } else if (user.getRole().equals("EMPLOYE")) {
+            tickets = ticketRepository.findByEtatAndEmploye(EtatTicket.valueOf(etat.toUpperCase()),user);
+        }else {
+            tickets =ticketRepository.findByEtat(EtatTicket.valueOf(etat.toUpperCase()));
+        }
         System.out.println(mail);
-        List<Ticket> tickets = ticketRepository.findByEtatAndEmploye(EtatTicket.valueOf(etat.toUpperCase()),user);
+
         if (tickets!=null){
             return  tickets;
         }
@@ -95,12 +104,12 @@ public class TicketServiceImpl implements ITicketService{
         calendar.add(Calendar.WEEK_OF_YEAR, -1);
         Date oneWeekAgo = calendar.getTime();
         User user =authentificationService.connected();
-        List<Ticket> tickets =ticketRepository.findByEtatAndEmployeAndDateFermetureAfter(EtatTicket.CLOSED,user,oneWeekAgo);
+        List<Ticket> tickets =ticketRepository.findByEtatAndItEmployeAndDateFermetureAfter(EtatTicket.CLOSED,user,oneWeekAgo);
         return tickets;
     }
     public Ticket dragAndDrop(String previousList,String Currentlist,Long idTicket){
         Ticket ticket = ticketRepository.findById(idTicket).orElse(null);
-
+       User user = authentificationService.connected();
         if(previousList.equals("cdk-drop-list-1")&&Currentlist.equals("cdk-drop-list-2")){
             ticket.setEtat(EtatTicket.CLOSED);
             ticket.setDateFermeture(new Date());
@@ -109,8 +118,26 @@ public class TicketServiceImpl implements ITicketService{
            return ticket =this.affecter(idTicket);
         } else if (previousList.equals("cdk-drop-list-1")&&Currentlist.equals("cdk-drop-list-0")) {
            return ticket = this.desaffecter(idTicket);
+        }else if (previousList.equals("cdk-drop-list-0")&&Currentlist.equals("cdk-drop-list-2")){
+            ticket.setItEmploye(user);
+            ticket.setEtat(EtatTicket.CLOSED);
+            ticket.setDateFermeture(new Date());
+            return ticketRepository.save(ticket);
+        }else if (previousList.equals("cdk-drop-list-2")&&Currentlist.equals("cdk-drop-list-1")){
+            ticket.setDateFermeture(null);
+            ticket.setEtat(EtatTicket.IN_PROGRESS);
+            //ticket.setItEmploye(null);
+
+  return  ticketRepository.save(ticket);
+        }else if (previousList.equals("cdk-drop-list-2")&&Currentlist.equals("cdk-drop-list-0")){
+            ticket.setDateFermeture(null);
+            ticket.setDateOuverture(null);
+            ticket.setEtat(EtatTicket.TO_DO);
+            ticket.setItEmploye(null);
+
+            return  ticketRepository.save(ticket);
         }
 
-        return null;
+            return null;
     }
 }

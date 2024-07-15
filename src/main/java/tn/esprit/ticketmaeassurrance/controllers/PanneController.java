@@ -18,7 +18,7 @@ import java.util.List;
 public class PanneController {
     private final PanneServiceImpl panneService;
     @PostMapping("/addpanne")
-    public ResponseEntity<Panne> addPanne(Panne panne){
+    public ResponseEntity<Panne> addPanne(@RequestBody  Panne panne){
         return ResponseEntity.ok(panneService.addPanne(panne));
     }
     @GetMapping("/getall")

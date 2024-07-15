@@ -34,6 +34,14 @@ public enum Role {
                     IT_DELETE,
                     IT_CREATE
             )
+    ),
+    EMPLOYE(
+            Set.of(
+                    EMPLOYE_READ,
+                    EMPLOYE_UPDATE,
+                    EMPLOYE_DELETE,
+                    EMPLOYE_CREATE
+            )
     );
     @Getter
     private final Set<Permission> permissions;
