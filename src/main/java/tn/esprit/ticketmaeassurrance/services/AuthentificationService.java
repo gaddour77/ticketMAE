@@ -159,7 +159,7 @@ public class AuthentificationService {
         Authentication loggedInUser = SecurityContextHolder.getContext().getAuthentication();
 
         String mail = loggedInUser.getName().toString();
-        System.out.println("connected user : "+mail);
+
         User user = userRepository.findByEmail(mail)
                 .orElseThrow(() -> new RuntimeException("Authenticated user not found"));
         return user;

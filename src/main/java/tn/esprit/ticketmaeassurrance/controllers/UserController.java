@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import tn.esprit.ticketmaeassurrance.entities.Ticket;
+import tn.esprit.ticketmaeassurrance.entities.User;
 import tn.esprit.ticketmaeassurrance.services.UserService;
 
 import java.util.List;
@@ -22,5 +23,9 @@ public class UserController {
     @GetMapping("/mytickets")
     public Set<Ticket> mytickets(){
         return userService.mytickets();
+    }
+    @GetMapping("/itemploye")
+    public List<User> getAllIt(){
+        return userService.gettAll();
     }
 }

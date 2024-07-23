@@ -10,6 +10,7 @@ import lombok.Setter;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -34,11 +35,14 @@ public class Ticket implements Serializable {
     @ManyToOne
     private User employe;
     @JsonIgnore
-    @ManyToOne
-    private User itEmploye;
     @ManyToOne(cascade=CascadeType.MERGE)
     private Panne panne;
-
+    @JsonIgnore
+    @OneToMany(cascade = {CascadeType.MERGE, CascadeType.REMOVE})
+    private List<Intervention> interventions;
+    public void addIntervention(Intervention intervention) {
+        interventions.add(intervention);
+    }
 
 
 }

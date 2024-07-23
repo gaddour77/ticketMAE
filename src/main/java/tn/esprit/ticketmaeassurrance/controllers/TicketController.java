@@ -1,10 +1,12 @@
 package tn.esprit.ticketmaeassurrance.controllers;
 
+import jakarta.websocket.server.PathParam;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import tn.esprit.ticketmaeassurrance.entities.Intervention;
 import tn.esprit.ticketmaeassurrance.entities.Ticket;
 import tn.esprit.ticketmaeassurrance.services.TicketServiceImpl;
 
@@ -46,8 +48,26 @@ public class TicketController {
     @PutMapping("/drag-drop")
     public Ticket dragAndDropTicket(@RequestParam("previousList") String previousList,
                                     @RequestParam("currentList") String currentList,
-                                    @RequestParam("idTicket") Long idTicket) {
-        return ticketService.dragAndDrop(previousList, currentList, idTicket);
+                                    @RequestParam("idTicket") Long idTicket,
+                                    @RequestBody(required = false) Intervention intervention) {
+        return ticketService.dragAndDrop(previousList, currentList, idTicket,intervention);
     }
-
+    @GetMapping("/affectedtickets")
+    public List<Ticket> affectedTickets(){
+        return ticketService.affectedTicket();
+    }
+    @GetMapping("/inprogress")
+    public List<Ticket> inProgress(){
+        return ticketService.inProgress();
+    }
+    @PutMapping("/affecterintervention")
+    public Intervention affecter( @RequestParam("idTicket") Long idTicket,
+                                  @RequestParam("idUser") Long idUser,
+                                  @RequestBody(required = false) Intervention intervention){
+        return ticketService.affecter(intervention,idTicket,idUser);
+    }
+    @GetMapping("/interventions/{id}")
+    public List<Intervention> interventions(@PathVariable("id") Long id){
+        return ticketService.interventions(id);
+    }
 }

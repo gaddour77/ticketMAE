@@ -18,6 +18,7 @@ public class Panne implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idPanne;
+
     private String description;
     @Enumerated(EnumType.STRING)
     private TypePanne typePanne;

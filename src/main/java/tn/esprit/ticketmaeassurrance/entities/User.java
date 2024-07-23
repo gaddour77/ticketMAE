@@ -35,9 +35,9 @@ public class User implements UserDetails , Principal{
    private Role role;
    @OneToMany(mappedBy = "employe",cascade = CascadeType.ALL)
    private Set<Ticket> ticketDeclare ;
-    @OneToMany(mappedBy = "itEmploye",cascade = CascadeType.ALL)
-    private Set<Ticket> ticketReserve;
 
+    @OneToMany(mappedBy = "user",cascade = CascadeType.MERGE)
+    private List<Intervention> interventions ;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
