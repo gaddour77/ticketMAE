@@ -58,7 +58,7 @@ public class JwtService {
 
     ) {
        extraClaims.put("role",userDetails.getAuthorities());
-        System.out.println("role"+userDetails.getAuthorities());
+
         return Jwts
                 .builder()
                 .setClaims(extraClaims)

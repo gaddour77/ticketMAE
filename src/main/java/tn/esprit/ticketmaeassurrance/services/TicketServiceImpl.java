@@ -1,7 +1,11 @@
 package tn.esprit.ticketmaeassurrance.services;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Service;
+import tn.esprit.ticketmaeassurrance.Dto.InterventionDto;
+import tn.esprit.ticketmaeassurrance.Dto.TicketStatistics;
 import tn.esprit.ticketmaeassurrance.entities.EtatTicket;
 import tn.esprit.ticketmaeassurrance.entities.Intervention;
 import tn.esprit.ticketmaeassurrance.entities.Ticket;
@@ -10,10 +14,19 @@ import tn.esprit.ticketmaeassurrance.repositories.InterventionRepository;
 import tn.esprit.ticketmaeassurrance.repositories.TicketRepository;
 import tn.esprit.ticketmaeassurrance.repositories.UserRepository;
 
+import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.Temporal;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
+
+@Slf4j
 @AllArgsConstructor
 public class TicketServiceImpl implements ITicketService{
     private final TicketRepository ticketRepository;
@@ -242,5 +255,146 @@ public class TicketServiceImpl implements ITicketService{
             return interventions;
         }
         return null;
+    }
+    public List<InterventionDto> dtos(Long idTicket){
+        Ticket ticket = ticketRepository.findById(idTicket).orElse(null);
+        List<Intervention> interventions = ticket.getInterventions();
+        if(interventions != null){
+            //return interventions;
+        }
+        return null;
+    }
+    public InterventionDto mapToDTO(Intervention intervention) {
+        InterventionDto dto = new InterventionDto();
+        dto.setId(intervention.getId());
+        dto.setRemarque(intervention.getRemarque());
+        dto.setDescription(intervention.getDescription());
+        dto.setAffectation(intervention.getAffectation());
+        dto.setStart(intervention.getStart());
+        dto.setEnd(intervention.getEnd());
+
+       dto.setUser(intervention.getUser());
+
+        return dto;
+    }
+
+    public List<InterventionDto> mapToDTOList(List<Intervention> interventions) {
+        if (interventions == null) {
+            return Collections.emptyList();
+        }
+        return interventions.stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+    public List<InterventionDto> getInterventionsDto(Long idTicket) {
+        Ticket ticket = ticketRepository.findById(idTicket).orElse(null);
+        if (ticket != null) {
+            List<Intervention> interventions = ticket.getInterventions();
+            return this.mapToDTOList(interventions);
+        }
+        return Collections.emptyList(); // Retourne une liste vide si le ticket est null
+    }
+    public List<Ticket> findAll(){
+        return ticketRepository.findAll();
+    }
+    public double calculateAverageClosureTime() {
+        List<Ticket> closedTickets = ticketRepository.findByEtat(EtatTicket.CLOSED);
+
+        if (closedTickets.isEmpty()) {
+            return 0;
+        }
+
+        long totalDuration = 0;
+        for (Ticket ticket : closedTickets) {
+            long duration = ticket.getDateFermeture().getTime() - ticket.getDateOuverture().getTime();
+            totalDuration += duration;
+        }
+
+        long averageDuration =  totalDuration / closedTickets.size();
+        return TimeUnit.MILLISECONDS.toHours(averageDuration); // convert to hours or any desired unit
+    }
+    public Map<String, Double> calculateAverageClosureTimePerDay() {
+        List<Ticket> closedTickets = ticketRepository.findByEtat(EtatTicket.CLOSED);
+
+        if (closedTickets.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Map<String, List<Ticket>> ticketsByDay = closedTickets.stream()
+                .collect(Collectors.groupingBy(ticket -> sdf.format(ticket.getDateOuverture())));
+        //test de premier map
+        System.out.println("tickets per day :" + ticketsByDay.toString());
+        Map<String, Double> averageClosureTimePerDay = new HashMap<>();
+        for (Map.Entry<String, List<Ticket>> entry : ticketsByDay.entrySet()) {
+            String day = entry.getKey();
+            List<Ticket> tickets = entry.getValue();
+            long totalDuration = 0;
+            for (Ticket ticket : tickets) {
+                long duration = ticket.getDateFermeture().getTime() - ticket.getDateOuverture().getTime();
+                totalDuration += duration;
+            }
+            double averageDuration = (double) totalDuration / tickets.size();
+            double averageDurationInHours = TimeUnit.MILLISECONDS.toHours((long) averageDuration) +
+                    ((double) (TimeUnit.MILLISECONDS.toMinutes((long) averageDuration) % 60) / 60);
+            averageClosureTimePerDay.put(day, averageDurationInHours);
+        }
+
+        return averageClosureTimePerDay;
+    }
+    public TicketStatistics getTicketStatistics() {
+        List<Ticket> tickets = ticketRepository.findAll();
+        List<Ticket> openTickets = ticketRepository.findByEtat(EtatTicket.CLOSED);
+        List<Intervention> interventions = interventionRepository.findAll();
+
+        int totalTickets = tickets.size();
+
+        double averageTicketTime = tickets.stream()
+                .mapToDouble(ticket -> {
+                    if (ticket.getDateOuverture() != null && ticket.getDateFermeture() != null) {
+                        LocalDateTime dateOuverture = toLocalDateTime(ticket.getDateOuverture());
+                        LocalDateTime dateFermeture = toLocalDateTime(ticket.getDateFermeture());
+                        return Duration.between(dateOuverture, dateFermeture).toMinutes();
+                    } else {
+                        return 0;
+                    }
+                })
+                .average()
+                .orElse(0.0);
+
+        int totalInterventions = interventions.size();
+        double totalInterventionTime = interventions.stream()
+                .mapToDouble(intervention -> {
+                    if (intervention.getStart() != null && intervention.getEnd() != null) {
+                        LocalDateTime start = toLocalDateTime(intervention.getStart());
+                        LocalDateTime end = toLocalDateTime(intervention.getEnd());
+                        return Duration.between(start, end).toMinutes();
+                    } else {
+                        return 0;
+                    }
+                })
+                .average()
+                .orElse(0.0);
+
+        double averageInterventionsPerTicket = openTickets.stream()
+                .mapToInt(ticket -> ticket.getInterventions().size())
+                .average()
+                .orElse(0.0);
+
+        TicketStatistics stats = new TicketStatistics(totalTickets, averageTicketTime, totalInterventions, totalInterventionTime, averageInterventionsPerTicket);
+        log.info("stats : {}", stats);
+        return stats;
+    }
+
+    private LocalDateTime toLocalDateTime(java.util.Date date) {
+        return date.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
+    }
+
+    private LocalDateTime toLocalDateTime(java.sql.Timestamp timestamp) {
+        return timestamp.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
     }
 }

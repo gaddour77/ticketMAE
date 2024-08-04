@@ -23,5 +23,6 @@ public interface TicketRepository extends JpaRepository<Ticket,Long> {
     List<Ticket> findTicketsInProgress(@Param("user") User user);
     @Query("SELECT t FROM Ticket t JOIN t.interventions i WHERE i.user = :user AND  i.end IS NOT NULL")
     List<Ticket> findTicketsDone(@Param("user") User user);
+
 }
 

@@ -2,6 +2,7 @@ package tn.esprit.ticketmaeassurrance.services;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import tn.esprit.ticketmaeassurrance.Dto.ITEmployeeInterventionsDTO;
 import tn.esprit.ticketmaeassurrance.entities.Intervention;
 import tn.esprit.ticketmaeassurrance.entities.Ticket;
 import tn.esprit.ticketmaeassurrance.entities.User;
@@ -9,7 +10,11 @@ import tn.esprit.ticketmaeassurrance.repositories.InterventionRepository;
 import tn.esprit.ticketmaeassurrance.repositories.TicketRepository;
 import tn.esprit.ticketmaeassurrance.repositories.UserRepository;
 
+import java.time.Duration;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -41,5 +46,35 @@ public class InterventionServiceImpl implements IInterventionService{
             return interventionRepository.save(intervention);
         }
         return null;
+    }
+    public List<Intervention> findAll(){
+        return interventionRepository.findAll();
+    }
+    public List<ITEmployeeInterventionsDTO> getITEmployeesOrderedByInterventionCount() {
+        List<Intervention> interventions = interventionRepository.findAllWithEmploye();
+
+        Map<User, List<Intervention>> interventionsByEmploye = interventions.stream()
+                .collect(Collectors.groupingBy(Intervention::getUser));
+
+        return interventionsByEmploye.entrySet().stream()
+                .map(entry -> {
+                    User employe = entry.getKey();
+                    List<Intervention> employeInterventions = entry.getValue();
+                    long interventionCount = employeInterventions.size();
+                    double averageTimeSpent = employeInterventions.stream()
+                            .filter(i -> i.getEnd() != null && i.getStart() != null)
+                            .mapToLong(i -> Duration.between(i.getStart().toInstant(), i.getEnd().toInstant()).toHours())
+                            .average()
+                            .orElse(0.0);
+
+                    return new ITEmployeeInterventionsDTO(
+                            employe.getIdUser(),
+                            employe.getFirstName() + " " + employe.getLastName(),
+                            interventionCount,
+                            averageTimeSpent
+                    );
+                })
+                .sorted((e1, e2) -> Long.compare(e2.getInterventionCount(), e1.getInterventionCount()))
+                .collect(Collectors.toList());
     }
 }

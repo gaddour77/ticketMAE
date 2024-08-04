@@ -58,6 +58,8 @@ public class SecurityConfiguration {
                                 .requestMatchers("/Ticket/**").permitAll()
                                 .requestMatchers("/Ticket/bytype").permitAll()
                                 .requestMatchers("/Ticket/byetat").permitAll()
+                                .requestMatchers("/admin").hasAnyRole(ADMIN.name())
+                                .requestMatchers("/admin/ticketstat").hasAnyRole(ADMIN.name())
                                 .requestMatchers("/api/v1/management/**").hasAnyRole(ADMIN.name())
                                 .requestMatchers("/api/v1/management/**").hasAnyRole(ADMIN.name())
                                 .requestMatchers("/api/v1/management/**").hasAnyRole(ADMIN.name())

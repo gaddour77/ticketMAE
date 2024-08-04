@@ -31,6 +31,7 @@ public class User implements UserDetails , Principal{
     @Email
     private String email;
     private String password;
+    private int phone;
    @Enumerated(EnumType.STRING)
    private Role role;
    @OneToMany(mappedBy = "employe",cascade = CascadeType.ALL)

@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import tn.esprit.ticketmaeassurrance.Dto.InterventionDto;
 import tn.esprit.ticketmaeassurrance.entities.Intervention;
 import tn.esprit.ticketmaeassurrance.entities.Ticket;
 import tn.esprit.ticketmaeassurrance.services.TicketServiceImpl;
@@ -67,7 +68,7 @@ public class TicketController {
         return ticketService.affecter(intervention,idTicket,idUser);
     }
     @GetMapping("/interventions/{id}")
-    public List<Intervention> interventions(@PathVariable("id") Long id){
-        return ticketService.interventions(id);
+    public List<InterventionDto> interventions(@PathVariable("id") Long id){
+        return ticketService.getInterventionsDto(id);
     }
 }
