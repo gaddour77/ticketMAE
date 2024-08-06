@@ -39,6 +39,10 @@ public class Admin {
     public Map<String, Double> getAverageClosureTimePerDay() {
         return ticketService.calculateAverageClosureTimePerDay();
     }
+    @GetMapping("/userstat/{id}")
+    public Map<String, Double> getAverageInterventionPerDay(@PathVariable Long id) {
+        return ticketService.calculateAverageInterventionTimePerDay(id);
+    }
     @GetMapping("/stat")
     public TicketStatistics getTicketStatistics() {
         return ticketService.getTicketStatistics();
@@ -46,6 +50,10 @@ public class Admin {
     @GetMapping("/it-employees")
     public List<ITEmployeeInterventionsDTO> getITEmployeesOrderedByInterventionCount() {
         return interventionService.getITEmployeesOrderedByInterventionCount();
+    }
+    @GetMapping("/itmonthstat/{userId}")
+    public Map<String, Long> getInterventionCountsForUserThisMonth(@PathVariable Long userId) {
+        return interventionService.getInterventionCountsForUserThisMonth(userId);
     }
 
 }

@@ -342,6 +342,48 @@ public class TicketServiceImpl implements ITicketService{
 
         return averageClosureTimePerDay;
     }
+    public Map<String, Double> calculateAverageInterventionTimePerDay(Long userId) {
+        // Fetch interventions for the specific user
+        User user  = userRepository.findById(userId).orElse(null);
+        List<Intervention> interventions = user.getInterventions();
+
+        if (interventions.isEmpty()) {
+            return Collections.emptyMap();
+        }
+         List<Intervention> i2 = interventions.stream().filter(intervention -> intervention.getStart()!=null).toList();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        // Group interventions by date
+        Map<String, List<Intervention>> interventionsByDay = i2.stream()
+                .collect(Collectors.groupingBy(intervention -> sdf.format(intervention.getStart())));
+
+        // Print the grouped interventions for debugging
+        System.out.println("interventions per day :" + interventionsByDay.toString());
+
+        // Calculate average intervention duration per day
+        Map<String, Double> averageInterventionTimePerDay = new HashMap<>();
+        for (Map.Entry<String, List<Intervention>> entry : interventionsByDay.entrySet()) {
+            String day = entry.getKey();
+            List<Intervention> dailyInterventions = entry.getValue();
+            long totalDuration = 0;
+
+            for (Intervention intervention : dailyInterventions) {
+                // Ensure start and end are not null
+                if (intervention.getStart() != null && intervention.getEnd() != null) {
+                    long duration = intervention.getEnd().getTime() - intervention.getStart().getTime();
+                    totalDuration += duration;
+                }
+            }
+
+            if (!dailyInterventions.isEmpty()) {
+                double averageDuration = (double) totalDuration / dailyInterventions.size();
+                double averageDurationInHours = TimeUnit.MILLISECONDS.toHours((long) averageDuration) +
+                        ((double) (TimeUnit.MILLISECONDS.toMinutes((long) averageDuration) % 60) / 60);
+                averageInterventionTimePerDay.put(day, averageDurationInHours);
+            }
+        }
+
+        return averageInterventionTimePerDay;
+    }
     public TicketStatistics getTicketStatistics() {
         List<Ticket> tickets = ticketRepository.findAll();
         List<Ticket> openTickets = ticketRepository.findByEtat(EtatTicket.CLOSED);
@@ -397,4 +439,5 @@ public class TicketServiceImpl implements ITicketService{
                 .atZone(ZoneId.systemDefault())
                 .toLocalDateTime();
     }
+
 }

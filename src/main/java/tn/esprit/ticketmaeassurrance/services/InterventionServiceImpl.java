@@ -12,6 +12,7 @@ import tn.esprit.ticketmaeassurrance.repositories.UserRepository;
 
 import java.time.Duration;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -76,5 +77,20 @@ public class InterventionServiceImpl implements IInterventionService{
                 })
                 .sorted((e1, e2) -> Long.compare(e2.getInterventionCount(), e1.getInterventionCount()))
                 .collect(Collectors.toList());
+    }
+    public Map<String, Long> getInterventionCountsForUserThisMonth(Long userId) {
+        User user =userRepository.findById(userId).orElse(null);
+        List<Intervention> interventions = interventionRepository.findByUser(user);
+       List<Intervention> affected = interventions.stream().filter(intervention -> intervention.getAffectation()!=null & intervention.getStart()==null).toList();
+        List<Intervention> inprogres = interventions.stream().filter(intervention -> intervention.getStart()!=null & intervention.getEnd()==null).toList();
+        List<Intervention> done = interventions.stream().filter(intervention -> intervention.getStart()!=null & intervention.getEnd()!=null).toList();
+
+      //  int affected = interventions.stream().mapToInt()
+        List<Object[]> results = interventionRepository.getInterventionCountsForUserThisMonth(userId);
+        Map<String, Long> counts = new HashMap<>();
+       counts.put("affected",affected.stream().count());
+        counts.put("doing",inprogres.stream().count());
+        counts.put("done",done.stream().count());
+        return counts;
     }
 }
