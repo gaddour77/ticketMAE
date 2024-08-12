@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import tn.esprit.ticketmaeassurrance.Dto.InterventionDto;
 import tn.esprit.ticketmaeassurrance.entities.Intervention;
 import tn.esprit.ticketmaeassurrance.entities.Ticket;
+import tn.esprit.ticketmaeassurrance.services.InterventionServiceImpl;
 import tn.esprit.ticketmaeassurrance.services.TicketServiceImpl;
 
 import java.util.List;
@@ -22,6 +23,7 @@ import java.util.List;
 
 public class TicketController {
     private final TicketServiceImpl ticketService;
+    private final InterventionServiceImpl interventionService;
     @PostMapping("/addticket")
     public ResponseEntity<Ticket> addTicket(@RequestBody Ticket ticket){
         return ResponseEntity.ok(ticketService.addTicket(ticket));
@@ -70,5 +72,13 @@ public class TicketController {
     @GetMapping("/interventions/{id}")
     public List<InterventionDto> interventions(@PathVariable("id") Long id){
         return ticketService.getInterventionsDto(id);
+    }
+    @GetMapping("/myintervention")
+    public List<Intervention> myinterventions(){
+        return interventionService.getMyInterventions();
+    }
+    @GetMapping("/ittickets/{idUser}")
+    public List<Ticket> ittickets(@PathVariable Long idUser){
+        return ticketService.myitTicket(idUser);
     }
 }

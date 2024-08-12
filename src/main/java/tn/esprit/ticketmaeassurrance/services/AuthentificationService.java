@@ -15,6 +15,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import tn.esprit.ticketmaeassurrance.Config.ApplicationAuditAware;
@@ -30,7 +31,9 @@ import tn.esprit.ticketmaeassurrance.security.JwtService;
 import tn.esprit.ticketmaeassurrance.security.PasswordGenerator;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.Random;
 
 @Service
 @AllArgsConstructor
@@ -45,7 +48,7 @@ public class AuthentificationService {
     public AuthenticationResponse register(RegistrationRequest request) {
         //password generé automatique pour l'envoi
        // String generatedPassword = PasswordGenerator.generatePassword();
-
+         // this.mailSender.sendMail(request.getEmail(),"your credentiels in mae ticketing plateforme","bonjour "+request.getLastname()+"votre mot de passe de notre plateforme est : "+request.getPassword());
         var user = User.builder()
         .firstName(request.getFirstname())
         .lastName(request.getLastname())
@@ -54,6 +57,8 @@ public class AuthentificationService {
         .build();
 
         var savedUser = userRepository.save(user);
+        this.mailSender.sendMail(request.getEmail(),"your credentiels in mae ticketing plateforme","bonjour "+request.getLastname()+"votre mot de passe de notre plateforme est : "+request.getPassword());
+
         //a configurer ki iji si moez
         //mailSender.sendMail(user.getEmail(),"votre compte a été crée  ","votre mot de passe actuelle est "+generatedPassword+"s'il vous plait changer votre mot de passe ");
         var jwtToken = jwtService.generateToken((UserDetails) user);
@@ -153,7 +158,41 @@ public class AuthentificationService {
             }
         }
     }
-
+    private String generateValidationCode() {
+        Random random = new Random();
+        int code = 100000 + random.nextInt(900000); // Generate 6-digit code
+        return String.valueOf(code);
+    }
+    public void sendValidation(String mail){
+      User user = userRepository.findByEmail(mail).orElseThrow(() -> new UsernameNotFoundException("User not found with email: " +mail));
+      if(user!=null){
+          String validation = generateValidationCode();
+          user.setValidationCode(validation);
+          user.setValidationCodeTimestamp(LocalDateTime.now());
+          userRepository.save(user);
+          mailSender.sendMail(user.getEmail(),"Validation Code to reset password","your validation code is : "+validation+" the code is valid only for 10 minutes");
+      }
+    }
+    public boolean isCodeValid(String mail, String submittedCode) {
+        User user = userRepository.findByEmail(mail).orElseThrow(() -> new UsernameNotFoundException("User not found with email: " +mail));
+        if(user!=null){
+            String userCode = user.getValidationCode();
+            LocalDateTime codeTimestamp = user.getValidationCodeTimestamp();
+            return userCode != null && userCode.equals(submittedCode) &&
+                    codeTimestamp != null && codeTimestamp.isAfter(LocalDateTime.now().minusMinutes(10)); // 10-minute validity
+        }
+       return false;
+    }
+    public User resetPassword(String mail , String password){
+        User user = userRepository.findByEmail(mail).orElseThrow(() -> new UsernameNotFoundException("User not found with email: " +mail));
+         if (user !=null){
+             user.setPassword(passwordEncoder.encode(password));
+             user.setValidationCodeTimestamp(null);
+             user.setValidationCode(null);
+             return userRepository.save(user);
+         }
+        return null;
+    }
     public User connected(){
 
         Authentication loggedInUser = SecurityContextHolder.getContext().getAuthentication();

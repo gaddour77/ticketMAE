@@ -24,4 +24,5 @@ public interface InterventionRepository extends JpaRepository<Intervention,Long>
             "MONTH(i.affectation) = MONTH(CURRENT_DATE) AND " +
             "YEAR(i.affectation) = YEAR(CURRENT_DATE)")
     List<Object[]> getInterventionCountsForUserThisMonth(@Param("userId") Long userId);
+    List<Intervention> findByUserOrderByStart(User user);
 }

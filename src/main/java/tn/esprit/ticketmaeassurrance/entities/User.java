@@ -8,6 +8,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -32,6 +33,8 @@ public class User implements UserDetails , Principal{
     private String email;
     private String password;
     private int phone;
+    private String validationCode;
+    private LocalDateTime validationCodeTimestamp;
    @Enumerated(EnumType.STRING)
    private Role role;
    @OneToMany(mappedBy = "employe",cascade = CascadeType.ALL)

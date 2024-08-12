@@ -28,4 +28,5 @@ public class PanneServiceImpl implements IPanneService{
         System.out.println(type);
         return panneRepository.findByTypePanne(TypePanne.valueOf(type));
     }
+
 }

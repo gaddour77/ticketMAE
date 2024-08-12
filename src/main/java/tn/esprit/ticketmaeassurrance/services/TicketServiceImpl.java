@@ -6,10 +6,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Service;
 import tn.esprit.ticketmaeassurrance.Dto.InterventionDto;
 import tn.esprit.ticketmaeassurrance.Dto.TicketStatistics;
-import tn.esprit.ticketmaeassurrance.entities.EtatTicket;
-import tn.esprit.ticketmaeassurrance.entities.Intervention;
-import tn.esprit.ticketmaeassurrance.entities.Ticket;
-import tn.esprit.ticketmaeassurrance.entities.User;
+import tn.esprit.ticketmaeassurrance.entities.*;
 import tn.esprit.ticketmaeassurrance.repositories.InterventionRepository;
 import tn.esprit.ticketmaeassurrance.repositories.TicketRepository;
 import tn.esprit.ticketmaeassurrance.repositories.UserRepository;
@@ -22,6 +19,7 @@ import java.time.ZoneId;
 import java.time.temporal.Temporal;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @Service
@@ -166,7 +164,7 @@ public class TicketServiceImpl implements ITicketService{
         }else if (previousList.equals("cdk-drop-list-0")&&Currentlist.equals("cdk-drop-list-1")){
             Intervention intervention1= this.findInterventionAffectedForUser(ticket,user);
             if(intervention!=null){
-                intervention1.setRemarque(intervention.getRemarque());
+                intervention1.setRemarque(intervention1.getRemarque()+ System.lineSeparator()+"    mon remarque personnel :  "+intervention.getRemarque());
                 intervention1.setStart(new Date());
             }
             return ticketRepository.save(ticket);
@@ -438,6 +436,35 @@ public class TicketServiceImpl implements ITicketService{
         return timestamp.toInstant()
                 .atZone(ZoneId.systemDefault())
                 .toLocalDateTime();
+    }
+    public Map<TypePanne, Double> calculatePercentageTimeSpentPerPanneType() {
+        List<Ticket> tickets = ticketRepository.findByEtat(EtatTicket.CLOSED);
+        Logger logger = Logger.getLogger(TicketServiceImpl.class.getName());
+
+        Map<TypePanne, Long> timeSpentPerPanneType = new HashMap<>();
+
+        for (Ticket ticket : tickets) {
+            if (ticket.getTicketType() == TicketType.PANNE) {
+                TypePanne typePanne = ticket.getPanne().getTypePanne();
+                long timeSpent = ticket.getDateFermeture().getTime() - ticket.getDateOuverture().getTime();
+                timeSpentPerPanneType.put(typePanne, timeSpentPerPanneType.getOrDefault(typePanne, 0L) + timeSpent);
+            }
+        }
+
+        long totalTimeSpent = timeSpentPerPanneType.values().stream().mapToLong(Long::longValue).sum();
+        Map<TypePanne, Double> percentageTimeSpentPerPanneType = new HashMap<>();
+
+        for (Map.Entry<TypePanne, Long> entry : timeSpentPerPanneType.entrySet()) {
+            double percentage = (totalTimeSpent > 0) ? ((double) entry.getValue() / totalTimeSpent * 100) : 0;
+            percentageTimeSpentPerPanneType.put(entry.getKey(), percentage);
+        }
+
+        logger.info("Percentage time spent per panne type: " + percentageTimeSpentPerPanneType);
+        return percentageTimeSpentPerPanneType;
+    }
+    public List<Ticket> myitTicket(Long idUser){
+        User user = userRepository.findById(idUser).orElse(null);
+        return  ticketRepository.finditTickets(user);
     }
 
 }

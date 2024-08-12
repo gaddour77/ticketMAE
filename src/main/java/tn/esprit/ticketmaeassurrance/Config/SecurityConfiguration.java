@@ -12,7 +12,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
+import org.springframework.web.cors.CorsConfiguration;
 import tn.esprit.ticketmaeassurrance.security.JwtFilter;
+
+import java.util.Arrays;
 
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 import static tn.esprit.ticketmaeassurrance.entities.Role.IT;
@@ -46,7 +49,13 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
+        http     .cors(cors -> cors.configurationSource(request -> {
+                    CorsConfiguration corsConfig = new CorsConfiguration();
+                    corsConfig.setAllowedOrigins(Arrays.asList("http://localhost:4200"));
+                    corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                    corsConfig.setAllowedHeaders(Arrays.asList("*"));
+                    return corsConfig;
+                }))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req ->
                         req.requestMatchers(WHITE_LIST_URL)
@@ -58,8 +67,9 @@ public class SecurityConfiguration {
                                 .requestMatchers("/Ticket/**").permitAll()
                                 .requestMatchers("/Ticket/bytype").permitAll()
                                 .requestMatchers("/Ticket/byetat").permitAll()
-                                .requestMatchers("/admin").hasAnyRole(ADMIN.name())
-                                .requestMatchers("/admin/ticketstat").hasAnyRole(ADMIN.name())
+                                .requestMatchers("/admin/**").hasAnyAuthority(ADMIN.name())
+                                .requestMatchers("/admin/ticketstat").hasAnyAuthority(ADMIN.name())
+                                .requestMatchers("/admin/ajouterpanne").hasAnyAuthority(ADMIN.name())
                                 .requestMatchers("/api/v1/management/**").hasAnyRole(ADMIN.name())
                                 .requestMatchers("/api/v1/management/**").hasAnyRole(ADMIN.name())
                                 .requestMatchers("/api/v1/management/**").hasAnyRole(ADMIN.name())

@@ -33,6 +33,21 @@ public class UserService implements IUserService{
         List<User> users = userRepository.findAllByRole(Role.IT);
         return users;
     }
-
+    public User upDateUser(User user){
+        User currentuser = userRepository.findById(user.getIdUser()).orElse(null);
+        if(currentuser!=null){
+            currentuser.setEmail(user.getEmail());
+            currentuser.setFirstName(user.getFirstName());
+            currentuser.setLastName(user.getLastName());
+            currentuser.setPhone(user.getPhone());
+            currentuser.setRole(user.getRole());
+            //currentuser.setPassword(user.getPassword());
+        return userRepository.save(currentuser);
+        }
+        return null;
+    }
+    public List<User> allusers(){
+        return userRepository.findAll();
+    }
 
 }

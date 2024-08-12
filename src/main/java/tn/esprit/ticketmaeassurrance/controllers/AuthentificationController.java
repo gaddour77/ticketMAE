@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import tn.esprit.ticketmaeassurrance.auth.AuthenticationRequest;
 import tn.esprit.ticketmaeassurrance.auth.AuthenticationResponse;
 import tn.esprit.ticketmaeassurrance.auth.RegistrationRequest;
+import tn.esprit.ticketmaeassurrance.entities.User;
+import tn.esprit.ticketmaeassurrance.security.LogoutService;
 import tn.esprit.ticketmaeassurrance.services.AuthentificationService;
 
 @RestController
@@ -17,6 +19,8 @@ import tn.esprit.ticketmaeassurrance.services.AuthentificationService;
 @CrossOrigin(origins = "http://localhost:4200")
 public class AuthentificationController {
     private final AuthentificationService authentificationService;
+    private final LogoutService logoutService;
+
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ResponseEntity<AuthenticationResponse> register (@RequestBody RegistrationRequest request){
@@ -29,4 +33,15 @@ public class AuthentificationController {
     ) {
         return ResponseEntity.ok(authentificationService.authenticate(request));
     }
+    @PutMapping("/validationcode")
+    public void sendValidation(@RequestParam String mail){authentificationService.sendValidation(mail);}
+    @GetMapping("/isvalid")
+    public boolean isValide(@RequestParam String mail,@RequestParam String code){
+        return authentificationService.isCodeValid(mail,code);
+    }
+    @PutMapping("/reset")
+    public User resetPassword(@RequestParam String mail,@RequestParam String password ){
+        return authentificationService.resetPassword(mail, password);
+    }
+
 }

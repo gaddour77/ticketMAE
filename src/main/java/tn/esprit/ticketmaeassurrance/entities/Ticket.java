@@ -34,7 +34,7 @@ public class Ticket implements Serializable {
     @JsonIgnore
     @ManyToOne
     private User employe;
-    @JsonIgnore
+
     @ManyToOne(cascade=CascadeType.MERGE)
     private Panne panne;
     @JsonIgnore

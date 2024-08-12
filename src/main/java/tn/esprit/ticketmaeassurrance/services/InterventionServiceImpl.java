@@ -64,7 +64,7 @@ public class InterventionServiceImpl implements IInterventionService{
                     long interventionCount = employeInterventions.size();
                     double averageTimeSpent = employeInterventions.stream()
                             .filter(i -> i.getEnd() != null && i.getStart() != null)
-                            .mapToLong(i -> Duration.between(i.getStart().toInstant(), i.getEnd().toInstant()).toHours())
+                            .mapToLong(i -> Duration.between(i.getStart().toInstant(), i.getEnd().toInstant()).toMinutes())
                             .average()
                             .orElse(0.0);
 
@@ -92,5 +92,12 @@ public class InterventionServiceImpl implements IInterventionService{
         counts.put("doing",inprogres.stream().count());
         counts.put("done",done.stream().count());
         return counts;
+    }
+    public List<Intervention> getMyInterventions(){
+        User user = authentificationService.connected();
+        if (user!=null){
+            return interventionRepository.findByUserOrderByStart(user);
+        }
+        return null;
     }
 }
