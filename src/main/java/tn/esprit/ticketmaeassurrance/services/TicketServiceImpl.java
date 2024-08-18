@@ -374,8 +374,7 @@ public class TicketServiceImpl implements ITicketService{
 
             if (!dailyInterventions.isEmpty()) {
                 double averageDuration = (double) totalDuration / dailyInterventions.size();
-                double averageDurationInHours = TimeUnit.MILLISECONDS.toHours((long) averageDuration) +
-                        ((double) (TimeUnit.MILLISECONDS.toMinutes((long) averageDuration) % 60) / 60);
+                double averageDurationInHours = TimeUnit.MILLISECONDS.toMinutes((long) averageDuration);
                 averageInterventionTimePerDay.put(day, averageDurationInHours);
             }
         }
@@ -466,5 +465,67 @@ public class TicketServiceImpl implements ITicketService{
         User user = userRepository.findById(idUser).orElse(null);
         return  ticketRepository.finditTickets(user);
     }
+  public Ticket updateticket(Long id,String description,String etat){
+        Ticket ticket = ticketRepository.findById(id).orElse(null);
+        User user =authentificationService.connected();
+        String adminName =user.getFirstName()+" "+user.getLastName();
+        if (ticket!=null){
+             List<Intervention> interventions = ticket.getInterventions();
+            if(EtatTicket.valueOf(etat)==EtatTicket.TO_DO){
+                ticket.setDateOuverture(null);
+                ticket.setDateFermeture(null);
+            } else if (EtatTicket.valueOf(etat)==EtatTicket.IN_PROGRESS) {
+                ticket.setDateFermeture(null);
+            } else if (EtatTicket.valueOf(etat)==EtatTicket.CLOSED &&ticket.getEtat()!=EtatTicket.CLOSED) {
+                ticket.setDateFermeture(new Date());
+                for (Intervention i : interventions){
+                    if(i.getEnd()==null && i.getStart()!=null){
+                        i.setDescription("fermé par l'admin : "+adminName);
+                        i.setEnd(new Date());
+                    } else if (i.getStart()==null ) {
+                        i.setRemarque("fermé par l'admin : "+adminName);
+                        i.setDescription("fermé par l'admin : "+adminName);
+                        i.setStart(new Date());
+                        i.setEnd(new Date());
+                    }
+                    interventionRepository.save(i);
+                }
+            }
+            ticket.setEtat(EtatTicket.valueOf(etat));
+            ticket.setDescription(description);
+            return ticketRepository.save(ticket);
+        }
+        return null;
+  }
+  public List<Ticket> ticketsdeclared(Long id){
+        User user = userRepository.findById(id).orElse(null);
+        if(user!=null){
+            return user.getTicketDeclare().stream().toList();
+        }
+        return null;
+  }
+  public Intervention affecterintervention(Intervention intervention,Long idTicket,Long idUser){
+        User user =authentificationService.connected();
+        User user1 = userRepository.findById(idUser).orElse(null);
+  Ticket ticket =ticketRepository.findById(idTicket).orElse(null);
+        if(intervention!=null && ticket!=null && user1 !=null){
+            if (ticket.getEtat()!=EtatTicket.IN_PROGRESS){
+                ticket.setEtat(EtatTicket.IN_PROGRESS);
+                ticket.setDateFermeture(null);
+                if (ticket.getEtat()!=EtatTicket.TO_DO){
+                    ticket.setDateOuverture(new Date());
+                }
 
+            }
+            intervention.setUser(user1);
+            intervention.setAffectation(new Date());
+            intervention.setRemarque(" affecté par "+user.getFirstName()+" : "+intervention.getRemarque());
+            interventionRepository.save(intervention);
+            ticket.addIntervention(intervention);
+            ticketRepository.save(ticket);
+            return intervention;
+
+        }
+        return null;
+  }
 }

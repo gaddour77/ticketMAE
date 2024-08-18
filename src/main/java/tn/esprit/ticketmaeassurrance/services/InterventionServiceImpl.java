@@ -100,4 +100,11 @@ public class InterventionServiceImpl implements IInterventionService{
         }
         return null;
     }
+    public List<Intervention> interventionsById(Long id){
+        User user =userRepository.findById(id).orElse(null);
+        if(user!=null){
+            return interventionRepository.findByUserOrderByStart(user);
+        }
+        return null;
+    }
 }

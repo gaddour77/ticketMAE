@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import tn.esprit.ticketmaeassurrance.entities.EtatTicket;
+import tn.esprit.ticketmaeassurrance.entities.Intervention;
 import tn.esprit.ticketmaeassurrance.entities.Ticket;
 import tn.esprit.ticketmaeassurrance.entities.User;
 
@@ -25,6 +26,7 @@ public interface TicketRepository extends JpaRepository<Ticket,Long> {
     List<Ticket> findTicketsDone(@Param("user") User user);
     @Query("SELECT t FROM Ticket t JOIN t.interventions i WHERE i.user = :user order by i.start")
     List<Ticket> finditTickets(@Param("user") User user);
+
 
 }
 

@@ -73,5 +73,22 @@ public class Admin {
     public Map<TypePanne, Double> getTimeSpentPerPanneType() {
         return ticketService.calculatePercentageTimeSpentPerPanneType();
     }
+    @GetMapping("/findinterventionbyuser/{id}")
+    public List<Intervention> interventionsById(@PathVariable Long id){
+        return interventionService.interventionsById(id);
+    }
+    @PutMapping("/updateticket")
+    public Ticket updateticket(
+           @RequestParam("idTicket") Long idTicket,@RequestParam("description") String description, @RequestParam("etat")String etat){
+        return ticketService.updateticket(idTicket,description,etat);
+    }
+    @GetMapping("/ticketdeclared/{id}")
+    public List<Ticket> ticketsdeclared(@PathVariable Long id){
+        return ticketService.ticketsdeclared(id);
+    }
+    @PutMapping("/affecterintervention")
+    public Intervention affecterintervention(@RequestBody(required = false) Intervention intervention, @RequestParam("idTicket")Long idTicket, @RequestParam("idUser")Long idUser){
+        return ticketService.affecterintervention(intervention,idTicket,idUser);
+    }
 
 }

@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -40,6 +41,7 @@ public class SecurityConfiguration {
             "/webjars/**",
             "/swagger-ui/index.html#/**",
             "/swagger-ui.html",
+            "/chat-socket/**",
             "/api/v1/auth/forgot-password/send-code",
             "api/reports/bannedUsers",
             "api/reports/unban"};
@@ -54,6 +56,7 @@ public class SecurityConfiguration {
                     corsConfig.setAllowedOrigins(Arrays.asList("http://localhost:4200"));
                     corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                     corsConfig.setAllowedHeaders(Arrays.asList("*"));
+                    corsConfig.setAllowCredentials(true);
                     return corsConfig;
                 }))
                 .csrf(AbstractHttpConfigurer::disable)
@@ -67,6 +70,7 @@ public class SecurityConfiguration {
                                 .requestMatchers("/Ticket/**").permitAll()
                                 .requestMatchers("/Ticket/bytype").permitAll()
                                 .requestMatchers("/Ticket/byetat").permitAll()
+                                .requestMatchers("/chat-socket/**").permitAll()
                                 .requestMatchers("/admin/**").hasAnyAuthority(ADMIN.name())
                                 .requestMatchers("/admin/ticketstat").hasAnyAuthority(ADMIN.name())
                                 .requestMatchers("/admin/ajouterpanne").hasAnyAuthority(ADMIN.name())
@@ -91,4 +95,5 @@ public class SecurityConfiguration {
 
         return http.build();
     }
+
 }

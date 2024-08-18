@@ -12,3 +12,12 @@ p {
     font-size: 16px;
     text-align: center;
 }
+header{
+    background-color: #50C878;
+
+}
+.headerlogo{
+    height: 40px; /* Adjust as needed */
+    width: auto;
+    margin-right: 10px;
+}
