@@ -38,6 +38,7 @@ public class TicketServiceImpl implements ITicketService{
         if(user!=null){
             ticket.setEmploye(user);
         }
+
         ticket.setEtat(EtatTicket.TO_DO);
         ticket.setDatePublication(new Date());
         return ticketRepository.save(ticket);

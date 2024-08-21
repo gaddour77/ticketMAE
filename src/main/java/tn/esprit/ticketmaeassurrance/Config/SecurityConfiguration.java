@@ -63,6 +63,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(req ->
                         req.requestMatchers(WHITE_LIST_URL)
                                 .permitAll()
+                                .requestMatchers("/video/**").permitAll()
                                 .requestMatchers("/api/v1/auth").permitAll()
                                 .requestMatchers("/v3/api-docs/**").permitAll()
                                 .requestMatchers("/panne/**").permitAll()
@@ -71,6 +72,7 @@ public class SecurityConfiguration {
                                 .requestMatchers("/Ticket/bytype").permitAll()
                                 .requestMatchers("/Ticket/byetat").permitAll()
                                 .requestMatchers("/chat-socket/**").permitAll()
+                                .requestMatchers("/api/tutorials/**").hasAnyAuthority(ADMIN.name(), IT.name())
                                 .requestMatchers("/admin/**").hasAnyAuthority(ADMIN.name())
                                 .requestMatchers("/admin/ticketstat").hasAnyAuthority(ADMIN.name())
                                 .requestMatchers("/admin/ajouterpanne").hasAnyAuthority(ADMIN.name())
