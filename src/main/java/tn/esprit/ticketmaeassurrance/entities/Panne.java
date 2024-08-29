@@ -23,4 +23,5 @@ public class Panne implements Serializable {
     @Enumerated(EnumType.STRING)
     private TypePanne typePanne;
 
+
 }

@@ -26,7 +26,7 @@ public interface TicketRepository extends JpaRepository<Ticket,Long> {
     List<Ticket> findTicketsDone(@Param("user") User user);
     @Query("SELECT t FROM Ticket t JOIN t.interventions i WHERE i.user = :user order by i.start")
     List<Ticket> finditTickets(@Param("user") User user);
-
+    List<Ticket> findByDatePublicationBetween(Date startDate, Date endDate);
 
 }
 

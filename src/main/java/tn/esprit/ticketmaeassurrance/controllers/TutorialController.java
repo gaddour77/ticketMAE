@@ -20,12 +20,13 @@ public class TutorialController {
 
     @PostMapping("/create")
     public ResponseEntity<Tutorial> createTutorial(@RequestParam("title") String title,
-                                                   @RequestParam("video") MultipartFile video) {
+                                                   @RequestParam("video") MultipartFile video,
+                                                   @RequestParam("access") String access) {
         System.out.println("Titre reçu : " + title);
         // Ajoutez un log ici
         System.out.println("Nom du fichier vidéo : " + video.getOriginalFilename());
         try {
-            Tutorial tutorial = tutorialService.saveTutorial(title, video);
+            Tutorial tutorial = tutorialService.saveTutorial(title, video,access);
             return ResponseEntity.ok(tutorial);
         } catch (IOException | java.io.IOException e) {
             return ResponseEntity.status(500).build();
@@ -35,5 +36,9 @@ public class TutorialController {
     public ResponseEntity<List<Tutorial>> getAllTutorials() {
         List<Tutorial> tutorials = tutorialService.getAllTutorials();
         return ResponseEntity.ok(tutorials);
+    }
+    @GetMapping("/getbyacces")
+    public List<Tutorial> getbyAcces(){
+        return tutorialService.getTutorials();
     }
 }

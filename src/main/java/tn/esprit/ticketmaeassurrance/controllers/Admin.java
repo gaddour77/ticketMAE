@@ -8,10 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import tn.esprit.ticketmaeassurrance.Dto.ITEmployeeInterventionsDTO;
 import tn.esprit.ticketmaeassurrance.Dto.TicketStatistics;
 import tn.esprit.ticketmaeassurrance.entities.*;
-import tn.esprit.ticketmaeassurrance.services.InterventionServiceImpl;
-import tn.esprit.ticketmaeassurrance.services.PanneServiceImpl;
-import tn.esprit.ticketmaeassurrance.services.TicketServiceImpl;
-import tn.esprit.ticketmaeassurrance.services.UserService;
+import tn.esprit.ticketmaeassurrance.services.*;
 
 import java.util.List;
 import java.util.Map;
@@ -27,6 +24,7 @@ public class Admin {
     private final InterventionServiceImpl interventionService;
     private final UserService userService;
     private final PanneServiceImpl panneService;
+    private final MachineService machineService;
     @GetMapping("/alltickets")
     public List<Ticket> findAll(){return ticketService.findAll();}
     @GetMapping("/byetat")
@@ -90,5 +88,16 @@ public class Admin {
     public Intervention affecterintervention(@RequestBody(required = false) Intervention intervention, @RequestParam("idTicket")Long idTicket, @RequestParam("idUser")Long idUser){
         return ticketService.affecterintervention(intervention,idTicket,idUser);
     }
-
+    @PostMapping("/machine/addmachine")
+    public Machine saveMachine(@RequestBody Machine machine){
+        return machineService.saveMachine(machine);
+    }
+    @GetMapping("/machine/findall")
+    public List<Machine> getall(){
+        return machineService.getall();
+    }
+    @GetMapping("/pannesparmachine")
+    public Map<String, Long> getPannesParMachineCetteAnnee(){
+        return ticketService.getPannesParMachineCetteAnnee();
+    }
 }

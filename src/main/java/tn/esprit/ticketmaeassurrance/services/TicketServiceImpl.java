@@ -53,9 +53,9 @@ public class TicketServiceImpl implements ITicketService{
 
     @Override
     public List<Ticket> getByEtatANDEMPLOYE(String etat) {
-        String mail = authentificationService.getCurrentUsername();
+       // String mail = authentificationService.getCurrentUsername();
 
-        User user = userRepository.findByEmail(mail).orElse(null);
+        User user = authentificationService.connected();
         List<Ticket> tickets = new ArrayList<Ticket>();
         if(user.getRole().equals("IT")){
             tickets = ticketRepository.findTicketsInProgress(user);
@@ -64,7 +64,7 @@ public class TicketServiceImpl implements ITicketService{
         }else {
             tickets =ticketRepository.findByEtat(EtatTicket.valueOf(etat.toUpperCase()));
         }
-        System.out.println(mail);
+        System.out.println("user name : "+user.getName());
 
         if (tickets!=null){
             return  tickets;
@@ -529,4 +529,18 @@ public class TicketServiceImpl implements ITicketService{
         }
         return null;
   }
+    public Map<String, Long> getPannesParMachineCetteAnnee() {
+        Date startOfYear = new Date(); // Vous devez ajuster cette date pour le début de l'année en cours
+        startOfYear.setMonth(0); // Janvier
+        startOfYear.setDate(1); // 1er jour du mois
+
+        Date endOfYear = new Date(); // Vous devez ajuster cette date pour la fin de l'année en cours
+        endOfYear.setMonth(11); // Décembre
+        endOfYear.setDate(31); // Dernier jour du mois
+
+        List<Ticket> tickets = ticketRepository.findByDatePublicationBetween(startOfYear, endOfYear);
+
+        return tickets.stream() .filter(ticket -> ticket.getTicketType() == TicketType.PANNE && ticket.getMachine() != null  )
+                .collect(Collectors.groupingBy(ticket -> ticket.getMachine().getName(), Collectors.counting()));
+    }
 }
