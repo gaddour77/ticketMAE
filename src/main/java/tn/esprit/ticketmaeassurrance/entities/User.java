@@ -42,6 +42,7 @@ public class User implements UserDetails , Principal{
 
     @OneToMany(mappedBy = "user",cascade = CascadeType.MERGE)
     private List<Intervention> interventions ;
+    private boolean bann;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -74,7 +75,7 @@ public class User implements UserDetails , Principal{
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return !bann;
     }
 
     public User orElse(Object o) {

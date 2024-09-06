@@ -17,6 +17,8 @@ public class UserService implements IUserService{
 
     private final UserRepository userRepository;
     private final AuthentificationService authentificationService;
+    private final TicketServiceImpl ticketService;
+    private final InterventionServiceImpl interventionService;
     @Override
     public Set<Ticket> mytickets() {
         String mail = authentificationService.getCurrentUsername();
@@ -49,5 +51,21 @@ public class UserService implements IUserService{
     public List<User> allusers(){
         return userRepository.findAll();
     }
+    public String delete(Long id ){
+        User user = userRepository.findById(id).orElse(null);
+        if(user.getIdUser()!=3 || user.getEmail()!="kaouther.kanzari@mae.tn"){
+            userRepository.delete(user);
+            return "le compte de "+ user.getFirstName()+" "+user.getLastName()+" est supprimé";
+        }
+        return " impossible de supprimer ce compte";
+    }
+    public User bann(Long id){
+        User user = userRepository.findById(id).orElse(null);
+        if (user!= null && user.getEmail()!="kaouther.kanzari@mae.tn"){
+            user.setBann(!user.isBann());
+           return userRepository.save(user);
 
+        }
+        return null;
+    }
 }

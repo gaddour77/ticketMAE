@@ -100,4 +100,8 @@ public class Admin {
     public Map<String, Long> getPannesParMachineCetteAnnee(){
         return ticketService.getPannesParMachineCetteAnnee();
     }
+    @PutMapping("/bann/{id}")
+    public User delete(@PathVariable Long id){
+        return userService.bann(id);
+    }
 }

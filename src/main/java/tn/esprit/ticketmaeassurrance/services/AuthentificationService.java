@@ -84,7 +84,7 @@ public class AuthentificationService {
                     .orElseThrow();
 
             // Check if the user is banned
-         /*   if (user.isBanned()) {
+         /*   if (user.isBann()) {
                 return AuthenticationResponse.builder()
                         .errorMessage("You are banned. Please contact support for assistance.")
                         .build();
