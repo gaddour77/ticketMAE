@@ -29,4 +29,8 @@ public class PanneController {
     public List<Panne> getByType(@RequestParam String type){
         return panneService.getDescriptionsParEnum(type);
     }
+    @DeleteMapping("/deletepanne/{id}")
+    public String deletepanne(@PathVariable Long id){
+        return panneService.delete(id);
+    }
 }

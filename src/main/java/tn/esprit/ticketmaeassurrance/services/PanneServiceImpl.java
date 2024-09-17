@@ -28,5 +28,13 @@ public class PanneServiceImpl implements IPanneService{
         System.out.println(type);
         return panneRepository.findByTypePanne(TypePanne.valueOf(type));
     }
+    public String delete(Long id){
+        Panne panne = panneRepository.findById(id).orElse(null);
+        if(panne !=null){
+            panneRepository.delete(panne);
+            return "panne n°"+id+" supprimé";
+        }
+        return "echeque de suppression";
+    }
 
 }

@@ -57,9 +57,9 @@ public class TicketServiceImpl implements ITicketService{
 
         User user = authentificationService.connected();
         List<Ticket> tickets = new ArrayList<Ticket>();
-        if(user.getRole().equals("IT")){
+        if(user.getRole()==Role.IT){
             tickets = ticketRepository.findTicketsInProgress(user);
-        } else if (user.getRole().equals("EMPLOYE")) {
+        } else if (user.getRole()==Role.EMPLOYE) {
             tickets = ticketRepository.findByEtatAndEmploye(EtatTicket.valueOf(etat.toUpperCase()),user);
         }else {
             tickets =ticketRepository.findByEtat(EtatTicket.valueOf(etat.toUpperCase()));
