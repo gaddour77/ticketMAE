@@ -9,6 +9,7 @@ import tn.esprit.ticketmaeassurrance.repositories.UserRepository;
 
 import java.net.Proxy;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @Service
@@ -61,7 +62,7 @@ public class UserService implements IUserService{
     }
     public User bann(Long id){
         User user = userRepository.findById(id).orElse(null);
-        if (user!= null && user.getEmail()!="kaouther.kanzari@mae.tn"){
+        if (user!= null && !Objects.equals(user.getEmail(), "kaouther.kanzari@mae.tn")){
             user.setBann(!user.isBann());
            return userRepository.save(user);
 

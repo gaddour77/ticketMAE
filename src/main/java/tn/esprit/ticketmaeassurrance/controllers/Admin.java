@@ -3,6 +3,8 @@ package tn.esprit.ticketmaeassurrance.controllers;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import tn.esprit.ticketmaeassurrance.Dto.ITEmployeeInterventionsDTO;
@@ -104,5 +106,10 @@ public class Admin {
     public User delete(@PathVariable Long id){
         return userService.bann(id);
     }
-
+    @MessageMapping("/send-list")
+    @SendTo("/topic/list")
+    public List<Ticket> sendList() {
+        // You can fetch or modify the list before sending if needed
+        return ticketService.findAll();
+    }
 }
