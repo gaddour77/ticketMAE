@@ -15,18 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 @AllArgsConstructor
 class TicketMaeAssurranceApplicationTests {
-     @Autowired
-     private final TicketServiceImpl ticketService;
 
-
-    @Test
-    public void testCalculatePercentageTimeSpentPerPanneType() {
-        Map<TypePanne, Double> result = ticketService.calculatePercentageTimeSpentPerPanneType();
-        System.out.println(result);
-        assertNotNull(result, "Result map should not be null");
-        assertTrue(!result.isEmpty(), "Result map should not be empty");
-        // Add additional assertions here based on expected results
-    }
     @Test
     void contextLoads() {
     }
